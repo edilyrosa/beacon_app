@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:math';
-//import 'package:intl/intl.dart';
-//import 'package:beacons_plugin/beacons_plugin.dart';
+import 'package:intl/intl.dart';
+import 'package:beacons_plugin/beacons_plugin.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+//version 12/09/2022
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
@@ -42,11 +43,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS =
-        IOSInitializationSettings(onDidReceiveLocalNotification: null);
+        DarwinInitializationSettings(onDidReceiveLocalNotification: null);
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: null);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   @override
@@ -217,7 +217,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           importance: Importance.high,
           priority: Priority.high,
           ticker: 'ticker');
-      var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+      var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
       var platformChannelSpecifics = NotificationDetails(
           android: androidPlatformChannelSpecifics,
           iOS: iOSPlatformChannelSpecifics);
