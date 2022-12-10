@@ -1,3 +1,5 @@
+package celuweb.com.orbis
+
 import com.umair.beacons_plugin.BeaconsPlugin
 import io.flutter.embedding.android.FlutterActivity
 

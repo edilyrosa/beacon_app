@@ -5,27 +5,28 @@ import 'package:intl/intl.dart';
 import 'package:beacons_plugin/beacons_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 //version 12/09/2022
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
-  String _tag = "Beacons Plugin";
+  final _tag = "Beacons Plugin";
   String _beaconResult = 'Not Scanned Yet.';
   int _nrMessagesReceived = 0;
   var isRunning = false;
-  List<String> _results = [];
+  final List<String> _results = [];
   bool _isInForeground = true;
 
   final ScrollController _scrollController = ScrollController();
@@ -39,11 +40,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     initPlatformState();
 
+    //WidgetsFlutterBinding.ensureInitialized(); //!added by me
+
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
+        const AndroidInitializationSettings('app_icon');
+    //!AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+
     var initializationSettingsIOS =
-        DarwinInitializationSettings(onDidReceiveLocalNotification: null);
+        const DarwinInitializationSettings(onDidReceiveLocalNotification: null);
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -72,7 +77,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               "[This app] collects location data to enable [feature], [feature], & [feature] even when the app is closed or not in use");
 
       //Only in case, you want the dialog to be shown again. By Default, dialog will never be shown if permissions are granted.
-      //await BeaconsPlugin.clearDisclosureDialogShowFlag(false);
+      await BeaconsPlugin.clearDisclosureDialogShowFlag(false);
     }
 
     if (Platform.isAndroid) {
@@ -118,6 +123,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     beaconEventsController.stream.listen(
         (data) {
           if (data.isNotEmpty && isRunning) {
+            print("***************************");
             setState(() {
               _beaconResult = data;
               _results.add(_beaconResult);
@@ -147,20 +153,35 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Monitoring Beacons'),
+          title: const Text(
+            'Loop Manager',
+            style: TextStyle(fontSize: 28),
+            textAlign: TextAlign.center,
+          ),
         ),
         body: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Container(
+                  width: double.infinity,
+                  height: 35,
+                  color: const Color.fromARGB(255, 14, 193, 233),
+                  child: const Card(
+                      elevation: 25,
+                      child: Text(
+                        "Monitoring Volvo's Racks",
+                        style: TextStyle(fontSize: 18),
+                        textAlign: TextAlign.center,
+                      ))),
               Center(
                   child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text('Total Results: $_nrMessagesReceived',
                     style: Theme.of(context).textTheme.headline4?.copyWith(
                           fontSize: 14,
-                          color: const Color(0xFF22369C),
+                          color: const Color.fromARGB(255, 14, 193, 233),
                           fontWeight: FontWeight.bold,
                         )),
               )),
@@ -179,7 +200,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     });
                   },
                   child: Text(isRunning ? 'Stop Scanning' : 'Start Scanning',
-                      style: TextStyle(fontSize: 20)),
+                      style: const TextStyle(fontSize: 20)),
                 ),
               ),
               Visibility(
@@ -193,12 +214,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         _results.clear();
                       });
                     },
-                    child:
-                        Text("Clear Results", style: TextStyle(fontSize: 20)),
+                    child: const Text("Clear Results",
+                        style: TextStyle(fontSize: 20)),
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20.0,
               ),
               Expanded(child: _buildResultsList())
@@ -210,14 +231,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   void _showNotification(String subtitle) {
-    var rng = new Random();
-    Future.delayed(Duration(seconds: 5)).then((result) async {
-      var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    var rng = Random();
+    Future.delayed(const Duration(seconds: 5)).then((result) async {
+      const androidPlatformChannelSpecifics = AndroidNotificationDetails(
           'your channel id', 'your channel name',
           importance: Importance.high,
           priority: Priority.high,
           ticker: 'ticker');
-      var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+      var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
       var platformChannelSpecifics = NotificationDetails(
           android: androidPlatformChannelSpecifics,
           iOS: iOSPlatformChannelSpecifics);
@@ -229,15 +250,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Widget _buildResultsList() {
     return Scrollbar(
-      isAlwaysShown: true,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ListView.separated(
         shrinkWrap: true,
         scrollDirection: Axis.vertical,
-        physics: ScrollPhysics(),
+        physics: const ScrollPhysics(),
         controller: _scrollController,
         itemCount: _results.length,
-        separatorBuilder: (BuildContext context, int index) => Divider(
+        separatorBuilder: (BuildContext context, int index) => const Divider(
           height: 1,
           color: Colors.black,
         ),
@@ -262,122 +283,3 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 }
-
-/*
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
-*/
