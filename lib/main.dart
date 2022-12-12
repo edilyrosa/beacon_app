@@ -45,6 +45,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('app_icon');
+
     //!AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
 
     var initializationSettingsIOS =
