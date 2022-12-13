@@ -124,7 +124,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     beaconEventsController.stream.listen(
         (data) {
           if (data.isNotEmpty && isRunning) {
-            print("***************************");
+            print("******Reading**************");
             setState(() {
               _beaconResult = data;
               _results.add(_beaconResult);
@@ -191,8 +191,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (isRunning) {
+                      print("corriendo");
                       await BeaconsPlugin.stopMonitoring();
                     } else {
+                      print("No corriendo");
                       initPlatformState();
                       await BeaconsPlugin.startMonitoring();
                     }
