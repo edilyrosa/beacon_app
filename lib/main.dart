@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:intl/intl.dart';
@@ -26,7 +27,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String _beaconResult = 'Not Scanned Yet.';
   int _nrMessagesReceived = 0;
   var isRunning = false;
-  final List<String> _results = [];
+  final List<dynamic> _results = [];
   bool _isInForeground = true;
 
   final ScrollController _scrollController = ScrollController();
@@ -75,7 +76,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       await BeaconsPlugin.setDisclosureDialogMessage(
           title: "Background Locations",
           message:
-              "[This app] collects location data to enable [feature], [feature], & [feature] even when the app is closed or not in use");
+              "This app collects data to enable the Location of nearby devices even when the app is closed or not in use");
 
       //Only in case, you want the dialog to be shown again. By Default, dialog will never be shown if permissions are granted.
       await BeaconsPlugin.clearDisclosureDialogShowFlag(false);
@@ -127,7 +128,15 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
             print("******Reading**************");
             setState(() {
               _beaconResult = data;
-              _results.add(_beaconResult);
+              //!NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+              //checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
+
+              bool uuidExist = otroFor(data);
+
+              if (uuidExist == false) {
+                _results.add(jsonDecode(_beaconResult));
+              }
+              // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
               _nrMessagesReceived++;
             });
 
@@ -147,6 +156,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     await BeaconsPlugin.runInBackground(true);
 
     if (!mounted) return;
+  }
+
+  bool otroFor(String data) {
+    var uuidExist = false;
+    for (var element in _results) {
+      if (element['uuid'] == jsonDecode(data)['uuid']) {
+        uuidExist = true;
+      }
+    }
+    return uuidExist;
   }
 
   @override
@@ -173,15 +192,19 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       elevation: 25,
                       child: Text(
                         "Monitoring Volvo's Racks",
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w800,
+                        ),
                         textAlign: TextAlign.center,
                       ))),
               Center(
                   child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text('Total Results: $_nrMessagesReceived',
+                child: Text('Total Results: ' + _results.length.toString(),
                     style: Theme.of(context).textTheme.headline4?.copyWith(
-                          fontSize: 14,
+                          fontSize: 18,
                           color: const Color.fromARGB(255, 14, 193, 233),
                           fontWeight: FontWeight.bold,
                         )),
@@ -269,9 +292,49 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           DateTime now = DateTime.now();
           String formattedDate =
               DateFormat('yyyy-MM-dd – kk:mm:ss.SSS').format(now);
+
+          final item2 = Card(
+            elevation: 5,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 15),
+                          child: ThemeLabelValue(
+                            label: 'Proximity:',
+                            value: _results[index]['proximity'],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: ThemeLabelValue(
+                          label: 'UUID:',
+                          value: _results[index]['uuid'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                ],
+              ),
+            ),
+          );
           final item = ListTile(
               title: Text(
-                "Time: $formattedDate\n${_results[index]}",
+                "Time: $formattedDate\nuuid: ${_results[index]['uuid']}", //!PONER LOS NOMBRS EN NEGRITA
                 textAlign: TextAlign.justify,
                 style: Theme.of(context).textTheme.headline4?.copyWith(
                       fontSize: 14,
@@ -280,9 +343,176 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     ),
               ),
               onTap: () {});
-          return item;
+
+          final item3 = SizedBox(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.all(5),
+              child: Card(
+                elevation: 15,
+                child: Column(
+                  children: [
+                    // ListTile(
+                    //   title: const Text(
+                    //     textAlign: TextAlign.justify,
+                    //     'NAME',
+                    //     style: TextStyle(
+                    //       color: Color.fromARGB(255, 71, 207, 245),
+                    //       fontWeight: FontWeight.w500,
+                    //       fontSize: 14,
+                    //     ),
+                    //   ),
+                    //   subtitle: Text(
+                    //     _results[index]['name'],
+                    //     style: const TextStyle(
+                    //         fontWeight: FontWeight.normal, fontSize: 14),
+                    //   ),
+                    // ),
+                    ListTile(
+                      title: const Text(
+                        'UUID',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(_results[index]['uuid']),
+                    ),
+
+                    ListTile(
+                      title: const Text(
+                        'MAJOR',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(_results[index]['major']),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'MINOR',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(_results[index]['minor']),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        textAlign: TextAlign.justify,
+                        'DISTANCE',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _results[index]['distance'],
+                        style: const TextStyle(
+                            fontWeight: FontWeight.normal, fontSize: 14),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'PROXIMITY',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text((_results[index]['proximity']).toString()),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        textAlign: TextAlign.justify,
+                        'RSSI',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _results[index]['rssi'],
+                        style: const TextStyle(
+                            fontWeight: FontWeight.normal, fontSize: 14),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        textAlign: TextAlign.justify,
+                        'macAddress',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _results[index]['macAddress'],
+                        style: const TextStyle(
+                            fontWeight: FontWeight.normal, fontSize: 14),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text(
+                        textAlign: TextAlign.justify,
+                        'TxPower',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 245),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _results[index]['txPower'],
+                        style: const TextStyle(
+                            fontWeight: FontWeight.normal, fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          return item3;
         },
       ),
+    );
+  }
+}
+
+class ThemeLabelValue extends StatelessWidget {
+  final String label;
+  final String? value;
+
+  const ThemeLabelValue({this.label = '', this.value}) : super(key: null);
+
+  @override
+  Widget build(BuildContext context) {
+    String text = value ?? '';
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        Text((text != '') ? text : 'N/A'),
+      ],
     );
   }
 }
