@@ -24,7 +24,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       FlutterLocalNotificationsPlugin();
 
   final _tag = "Beacons Plugin";
-  String _beaconResult = 'Not Scanned Yet.';
   int _nrMessagesReceived = 0;
   var isRunning = false;
   final List<dynamic> _results = [];
@@ -39,7 +38,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    initPlatformState();
+    // initPlatformState();
 
     //WidgetsFlutterBinding.ensureInitialized(); //!added by me
 
@@ -71,73 +70,34 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    if (Platform.isAndroid) {
-      //Prominent disclosure
-      await BeaconsPlugin.setDisclosureDialogMessage(
-          title: "Background Locations",
-          message:
-              "This app collects data to enable the Location of nearby devices even when the app is closed or not in use");
+    try {
+      BeaconsPlugin.listenToBeacons(beaconEventsController);
 
-      //Only in case, you want the dialog to be shown again. By Default, dialog will never be shown if permissions are granted.
-      await BeaconsPlugin.clearDisclosureDialogShowFlag(false);
-    }
+      beaconEventsController.stream.listen((data) {
+        print('data');
+        print(data);
+        print(data.isEmpty);
+        if (data.isNotEmpty && isRunning) {
+          print("******Reading**************");
+          dynamic decodedData = jsonDecode(data);
+          if (decodedData is Map) {
+            final Map beaconResult = decodedData;
+            // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+            // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
 
-    if (Platform.isAndroid) {
-      BeaconsPlugin.channel.setMethodCallHandler((call) async {
-        print("Method: ${call.method}");
-        if (call.method == 'scannerReady') {
-          _showNotification("Beacons monitoring started..");
-          await BeaconsPlugin.startMonitoring();
-          setState(() {
-            isRunning = true;
-          });
-        } else if (call.method == 'isPermissionDialogShown') {
-          _showNotification(
-              "Prominent disclosure message is shown to the user!");
-        }
-      });
-    } else if (Platform.isIOS) {
-      _showNotification("Beacons monitoring started..");
-      await BeaconsPlugin.startMonitoring();
-      setState(() {
-        isRunning = true;
-      });
-    }
+            int existingIndex = _results.indexWhere(
+                (element) => element['uuid'] == beaconResult['uuid']);
 
-    BeaconsPlugin.listenToBeacons(beaconEventsController);
+            if (existingIndex >= 0) {
+              _results[existingIndex] = beaconResult;
+            } else {
+              _results.add(beaconResult);
+            }
 
-    await BeaconsPlugin.addRegion(
-        "BeaconType1", "909c3cf9-fc5c-4841-b695-380958a51a5a");
-    await BeaconsPlugin.addRegion(
-        "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
-
-    BeaconsPlugin.addBeaconLayoutForAndroid(
-        "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
-    BeaconsPlugin.addBeaconLayoutForAndroid(
-        "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
-
-    BeaconsPlugin.setForegroundScanPeriodForAndroid(
-        foregroundScanPeriod: 2200, foregroundBetweenScanPeriod: 10);
-
-    BeaconsPlugin.setBackgroundScanPeriodForAndroid(
-        backgroundScanPeriod: 2200, backgroundBetweenScanPeriod: 10);
-
-    beaconEventsController.stream.listen(
-        (data) {
-          if (data.isNotEmpty && isRunning) {
-            print("******Reading**************");
             setState(() {
-              _beaconResult = data;
-              //!NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
-              //checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
-
-              bool uuidExist = otroFor(data);
-
-              if (uuidExist == false) {
-                _results.add(jsonDecode(_beaconResult));
-              }
               // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
               _nrMessagesReceived++;
+              _results;
             });
 
             if (!_isInForeground) {
@@ -146,26 +106,87 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
             print("Beacons DataReceived: " + data);
           }
-        },
-        onDone: () {},
-        onError: (error) {
-          print("Error: $error");
-        });
+        }
+      }, onDone: () {
+        print('done');
+      }, onError: (error) {
+        print("Error: $error");
+      });
 
-    //Send 'true' to run in background
-    await BeaconsPlugin.runInBackground(true);
+      //Send 'true' to run in background
+      await BeaconsPlugin.runInBackground(true);
+
+      if (Platform.isAndroid) {
+        //Prominent disclosure
+        await BeaconsPlugin.setDisclosureDialogMessage(
+            title: "Background Locations",
+            message:
+                "This app collects data to enable the Location of nearby devices even when the app is closed or not in use");
+
+        //Only in case, you want the dialog to be shown again. By Default, dialog will never be shown if permissions are granted.
+        await BeaconsPlugin.clearDisclosureDialogShowFlag(false);
+      }
+
+      if (Platform.isAndroid) {
+        await BeaconsPlugin.addRegion(
+            "BeaconType1", "909c3cf9-fc5c-4841-b695-380958a51a5a");
+        await BeaconsPlugin.addRegion(
+            "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
+
+        BeaconsPlugin.addBeaconLayoutForAndroid(
+            "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
+        BeaconsPlugin.addBeaconLayoutForAndroid(
+            "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
+
+        BeaconsPlugin.setForegroundScanPeriodForAndroid(
+            foregroundScanPeriod: 2200, foregroundBetweenScanPeriod: 10);
+
+        BeaconsPlugin.setBackgroundScanPeriodForAndroid(
+            backgroundScanPeriod: 2200, backgroundBetweenScanPeriod: 10);
+
+        BeaconsPlugin.channel.setMethodCallHandler((call) async {
+          print("Method: ${call.method}");
+          if (call.method == 'scannerReady') {
+            _showNotification("Beacons monitoring started..");
+            await BeaconsPlugin.startMonitoring();
+            setState(() {
+              isRunning = true;
+            });
+          } else if (call.method == 'isPermissionDialogShown') {
+            _showNotification(
+                "Prominent disclosure message is shown to the user!");
+          }
+        });
+      } else if (Platform.isIOS) {
+        _showNotification("Beacons monitoring started..");
+        // List<Map<String, dynamic>> dataReceived
+        // for (var beacon in dataReceived) {
+        //    BeaconsPlugin.addRegionForIOS(
+        //      beacon['uuid'], // String
+        //      beacon['major], // int
+        //      beacon['minor], // int
+        //      beacon['name'], // String
+        //    );
+        // }
+
+        //    BeaconsPlugin.addRegionForIOS(
+        //      '58A97DEC-7CD7-44CB-9DA8-F02DC3466165',
+        //      55,
+        //      66,
+        //      'BeaconType1',
+        //    );
+        // BeaconsPlugin.addRegionForIOS(
+        //     '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d', 55, 55, 'BeaconType2');
+        await BeaconsPlugin.startMonitoring();
+        // setState(() {
+        //   isRunning = true;
+        // });
+      }
+    } catch (e) {
+      print('ERRORRR');
+    }
 
     if (!mounted) return;
-  }
-
-  bool otroFor(String data) {
-    var uuidExist = false;
-    for (var element in _results) {
-      if (element['uuid'] == jsonDecode(data)['uuid']) {
-        uuidExist = true;
-      }
-    }
-    return uuidExist;
   }
 
   @override
@@ -214,12 +235,12 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (isRunning) {
-                      print("corriendo");
+                      print("Stop");
                       await BeaconsPlugin.stopMonitoring();
                     } else {
-                      print("No corriendo");
+                      print("Start");
                       initPlatformState();
-                      await BeaconsPlugin.startMonitoring();
+                      //await BeaconsPlugin.startMonitoring();
                     }
                     setState(() {
                       isRunning = !isRunning;
