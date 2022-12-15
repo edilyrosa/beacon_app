@@ -294,196 +294,108 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               DateFormat('yyyy-MM-dd – kk:mm:ss.SSS').format(now);
 
           final item2 = Card(
-            elevation: 5,
+            elevation: 10,
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 15),
-                          child: ThemeLabelValue(
-                            label: 'Proximity:',
-                            value: _results[index]['proximity'],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
                         child: ThemeLabelValue(
-                          label: 'UUID:',
+                          label: 'UUID',
                           value: _results[index]['uuid'],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 15,
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'Major:',
+                          value: _results[index]['major'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'Minor:',
+                          value: _results[index]['minor'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'Distance:',
+                          value: _results[index]['distance'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'Proximity:',
+                          value: _results[index]['proximity'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'RSSI:',
+                          value: _results[index]['rssi'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'macAddress:',
+                          value: _results[index]['macAddress'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: ThemeLabelValue(
+                          label: 'txPower:',
+                          value: _results[index]['txPower'],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           );
-          final item = ListTile(
-              title: Text(
-                "Time: $formattedDate\nuuid: ${_results[index]['uuid']}", //!PONER LOS NOMBRS EN NEGRITA
-                textAlign: TextAlign.justify,
-                style: Theme.of(context).textTheme.headline4?.copyWith(
-                      fontSize: 14,
-                      color: const Color(0xFF1A1B26),
-                      fontWeight: FontWeight.normal,
-                    ),
-              ),
-              onTap: () {});
 
-          final item3 = SizedBox(
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.all(5),
-              child: Card(
-                elevation: 15,
-                child: Column(
-                  children: [
-                    // ListTile(
-                    //   title: const Text(
-                    //     textAlign: TextAlign.justify,
-                    //     'NAME',
-                    //     style: TextStyle(
-                    //       color: Color.fromARGB(255, 71, 207, 245),
-                    //       fontWeight: FontWeight.w500,
-                    //       fontSize: 14,
-                    //     ),
-                    //   ),
-                    //   subtitle: Text(
-                    //     _results[index]['name'],
-                    //     style: const TextStyle(
-                    //         fontWeight: FontWeight.normal, fontSize: 14),
-                    //   ),
-                    // ),
-                    ListTile(
-                      title: const Text(
-                        'UUID',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(_results[index]['uuid']),
-                    ),
-
-                    ListTile(
-                      title: const Text(
-                        'MAJOR',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(_results[index]['major']),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'MINOR',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(_results[index]['minor']),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        textAlign: TextAlign.justify,
-                        'DISTANCE',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(
-                        _results[index]['distance'],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'PROXIMITY',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text((_results[index]['proximity']).toString()),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        textAlign: TextAlign.justify,
-                        'RSSI',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(
-                        _results[index]['rssi'],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        textAlign: TextAlign.justify,
-                        'macAddress',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(
-                        _results[index]['macAddress'],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        textAlign: TextAlign.justify,
-                        'TxPower',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 71, 207, 245),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(
-                        _results[index]['txPower'],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-
-          return item3;
+          return item2;
         },
       ),
     );

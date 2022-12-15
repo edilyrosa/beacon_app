@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.beacon_app">
+    
     <!-- The INTERNET permission is required for development. Specifically,
          the Flutter tool needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
@@ -52,7 +53,9 @@
 
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
                      android:usesPermissionFlags="neverForLocation" />
-         
+
+    
+
     <application
         android:label="beacon_app"
         android:name="${applicationName}"
