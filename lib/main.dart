@@ -159,16 +159,140 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         });
       } else if (Platform.isIOS) {
         _showNotification("Beacons monitoring started..");
-        // List<Map<String, dynamic>> dataReceived
-        // for (var beacon in dataReceived) {
-        //    BeaconsPlugin.addRegionForIOS(
-        //      beacon['uuid'], // String
-        //      beacon['major], // int
-        //      beacon['minor], // int
-        //      beacon['name'], // String
-        //    );
-        // }
-
+        List<Map<String, dynamic>> dataReceived = [
+          {
+            'uuid': '58b8008b-b05b-4783-bd32-2da7294b81d7',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '7ba4fa5e-5f3d-4ff8-b4f0-fd3667da162b',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'ab28f612-79e5-43a4-9bb4-a0f0c4c170de',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '8ad0b1a2-6b7f-468a-8d16-12a2e4b0eed7',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '6f7e45ce-ee71-4a1e-81e7-ac6eb6318478',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '04b41a3b-a926-45a5-b54a-f98cb8eaaec2',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'b1e467b2-ce29-4c93-a6bc-b50a8a5a0140',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'c4925d93-4258-43eb-8946-876c1a54f2c6',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'f9f142d8-83d4-4a80-a8f2-31a012473c20',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '769b054c-dafa-4aa3-acd7-1aee1a931600',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '443b0b45-d34a-4f72-a960-d87ce31b4f29',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'a9dcec49-cc40-4682-a3e9-efb6a9d3a498',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '3562a67c-83a9-4216-b44b-07d87d9e2915',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '07fce829-f984-4fbf-b6cc-3b7566719bda',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'c67dd57f-2db0-427a-9a6f-374c32906bfa',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '17ae34f6-077b-42da-bb27-158e298cea70',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'bd77811d-10b9-4137-9627-a4f8bf0325d9',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '649a63b0-ea76-4a01-a96b-466c32410aa8',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '0a1b0d57-79d2-4c73-ac31-dde7a94543c7',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'a4514da0-8a02-436c-a737-0806ffde91b3',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5',
+            'major': 55,
+            'minor': 55
+          },
+          {
+            'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf',
+            'major': 55,
+            'minor': 55
+          },
+        ];
+        int counter = 0;
+        for (var beacon in dataReceived) {
+          BeaconsPlugin.addRegionForIOS(
+            beacon['uuid'], // String
+            beacon['major'], // int,
+            beacon['minor'], // int
+            counter.toString(), // String
+          );
+          counter++;
+        }
+        print('counter:');
+        print(counter);
         //    BeaconsPlugin.addRegionForIOS(
         //      '58A97DEC-7CD7-44CB-9DA8-F02DC3466165',
         //      55,
@@ -184,6 +308,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
     } catch (e) {
       print('ERRORRR');
+      print(e);
     }
 
     if (!mounted) return;
