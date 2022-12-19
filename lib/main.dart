@@ -71,51 +71,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     try {
-      BeaconsPlugin.listenToBeacons(beaconEventsController);
-
-      beaconEventsController.stream.listen((data) {
-        print('data');
-        print(data);
-        print(data.isEmpty);
-        if (data.isNotEmpty && isRunning) {
-          print("******Reading**************");
-          dynamic decodedData = jsonDecode(data);
-          if (decodedData is Map) {
-            final Map beaconResult = decodedData;
-            // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
-            // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
-
-            int existingIndex = _results.indexWhere(
-                (element) => element['uuid'] == beaconResult['uuid']);
-
-            if (existingIndex >= 0) {
-              _results[existingIndex] = beaconResult;
-            } else {
-              _results.add(beaconResult);
-            }
-
-            setState(() {
-              // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
-              _nrMessagesReceived++;
-              _results;
-            });
-
-            if (!_isInForeground) {
-              _showNotification("Beacons DataReceived: " + data);
-            }
-
-            print("Beacons DataReceived: " + data);
-          }
-        }
-      }, onDone: () {
-        print('done');
-      }, onError: (error) {
-        print("Error: $error");
-      });
-
-      //Send 'true' to run in background
-      await BeaconsPlugin.runInBackground(true);
-
       if (Platform.isAndroid) {
         //Prominent disclosure
         await BeaconsPlugin.setDisclosureDialogMessage(
@@ -128,22 +83,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
 
       if (Platform.isAndroid) {
-        await BeaconsPlugin.addRegion(
-            "BeaconType1", "909c3cf9-fc5c-4841-b695-380958a51a5a");
-        await BeaconsPlugin.addRegion(
-            "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
-
-        BeaconsPlugin.addBeaconLayoutForAndroid(
-            "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
-        BeaconsPlugin.addBeaconLayoutForAndroid(
-            "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
-
-        BeaconsPlugin.setForegroundScanPeriodForAndroid(
-            foregroundScanPeriod: 2200, foregroundBetweenScanPeriod: 10);
-
-        BeaconsPlugin.setBackgroundScanPeriodForAndroid(
-            backgroundScanPeriod: 2200, backgroundBetweenScanPeriod: 10);
-
         BeaconsPlugin.channel.setMethodCallHandler((call) async {
           print("Method: ${call.method}");
           if (call.method == 'scannerReady') {
@@ -157,7 +96,113 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 "Prominent disclosure message is shown to the user!");
           }
         });
+
+        BeaconsPlugin.listenToBeacons(beaconEventsController);
+
+        //await BeaconsPlugin.addRegion(
+        //  "BeaconType1", "0129DE6B-F5B6-4A02-94C5-EB64C1455116");
+        // await BeaconsPlugin.addRegion(
+        //     "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
+
+        BeaconsPlugin.addBeaconLayoutForAndroid(
+            "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
+        BeaconsPlugin.addBeaconLayoutForAndroid(
+            "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
+
+        BeaconsPlugin.setForegroundScanPeriodForAndroid(
+            foregroundScanPeriod: 2200, foregroundBetweenScanPeriod: 10);
+
+        BeaconsPlugin.setBackgroundScanPeriodForAndroid(
+            backgroundScanPeriod: 2200, backgroundBetweenScanPeriod: 10);
+
+        beaconEventsController.stream.listen((data) {
+          print('data');
+          print(data);
+          print(data.isEmpty);
+          if (data.isNotEmpty && isRunning) {
+            print("******Reading**************");
+            dynamic decodedData = jsonDecode(data);
+            if (decodedData is Map) {
+              final Map beaconResult = decodedData;
+              // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+              // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
+
+              int existingIndex = _results.indexWhere(
+                  (element) => element['uuid'] == beaconResult['uuid']);
+
+              if (existingIndex >= 0) {
+                _results[existingIndex] = beaconResult;
+              } else {
+                _results.add(beaconResult);
+              }
+
+              setState(() {
+                // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
+                _nrMessagesReceived++;
+                _results;
+              });
+
+              if (!_isInForeground) {
+                _showNotification("Beacons DataReceived: " + data);
+              }
+
+              print("Beacons DataReceived: " + data);
+            }
+          }
+        }, onDone: () {
+          print('done');
+        }, onError: (error) {
+          print("Error: $error");
+        });
+
+        //Send 'true' to run in background
+        await BeaconsPlugin.runInBackground(true);
       } else if (Platform.isIOS) {
+        BeaconsPlugin.listenToBeacons(beaconEventsController);
+
+        beaconEventsController.stream.listen((data) {
+          print('data');
+          print(data);
+          print(data.isEmpty);
+          if (data.isNotEmpty && isRunning) {
+            print("******Reading**************");
+            dynamic decodedData = jsonDecode(data);
+            if (decodedData is Map) {
+              final Map beaconResult = decodedData;
+              // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+              // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
+
+              int existingIndex = _results.indexWhere(
+                  (element) => element['uuid'] == beaconResult['uuid']);
+
+              if (existingIndex >= 0) {
+                _results[existingIndex] = beaconResult;
+              } else {
+                _results.add(beaconResult);
+              }
+
+              setState(() {
+                // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
+                _nrMessagesReceived++;
+                _results;
+              });
+
+              if (!_isInForeground) {
+                _showNotification("Beacons DataReceived: " + data);
+              }
+
+              print("Beacons DataReceived: " + data);
+            }
+          }
+        }, onDone: () {
+          print('done');
+        }, onError: (error) {
+          print("Error: $error");
+        });
+
+        //Send 'true' to run in background
+        await BeaconsPlugin.runInBackground(true);
+
         _showNotification("Beacons monitoring started..");
         List<Map<String, dynamic>> dataReceived = [
           {
@@ -291,8 +336,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
           counter++;
         }
-        print('counter:');
-        print(counter);
         //    BeaconsPlugin.addRegionForIOS(
         //      '58A97DEC-7CD7-44CB-9DA8-F02DC3466165',
         //      55,
@@ -365,7 +408,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     } else {
                       print("Start");
                       initPlatformState();
-                      //await BeaconsPlugin.startMonitoring();
+                      await BeaconsPlugin.startMonitoring();
                     }
                     setState(() {
                       isRunning = !isRunning;
@@ -439,9 +482,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           String formattedDate =
               DateFormat('yyyy-MM-dd – kk:mm:ss.SSS').format(now);
 
-          final item2 = Card(
-            elevation: 10,
-            child: Padding(
+          final item3 = Card(
+            color: Colors.grey[100],
+            elevation: 50,
+            child: Container(
+              margin: const EdgeInsets.all(10),
               padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -449,89 +494,168 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'UUID',
-                          value: _results[index]['uuid'],
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 1, horizontal: 5),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blue, width: 2)),
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          'iBeacon',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Color.fromARGB(255, 7, 199, 233)),
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const Text(
+                            'UUID',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          Text(_results[index]['uuid'],
+                              style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    color: Color.fromARGB(255, 86, 183, 235),
+                    //thickness: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Major',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['major'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Minor',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['minor'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Mac Address',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['macAddress'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
                         ),
                       ),
                     ],
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Major:',
-                          value: _results[index]['major'],
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'RSSI',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['rssi'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Minor:',
-                          value: _results[index]['minor'],
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Distance',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['distance'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Distance:',
-                          value: _results[index]['distance'],
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Proximity',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['proximity'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Proximity:',
-                          value: _results[index]['proximity'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'RSSI:',
-                          value: _results[index]['rssi'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'macAddress:',
-                          value: _results[index]['macAddress'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'txPower:',
-                          value: _results[index]['txPower'],
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              'Tx',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(_results[index]['txPower'],
+                                style: const TextStyle(fontSize: 10)),
+                          ],
                         ),
                       ),
                     ],
@@ -540,8 +664,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ),
             ),
           );
-
-          return item2;
+          return item3;
         },
       ),
     );
