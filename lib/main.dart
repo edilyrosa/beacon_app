@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:beacons_plugin/beacons_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-//import 'package:intl/intl_browser.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 //version 12/09/2022
 
@@ -30,6 +30,33 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var isRunning = false;
   final List<dynamic> _results = [];
   bool _isInForeground = true;
+  List<Map<String, dynamic>> dataReceived = [
+    {'uuid': '0129DE6B-F5B6-4A02-94C5-EB64C1455116', 'major': 1, 'minor': 1},
+    {'uuid': '58b8008b-b05b-4783-bd32-2da7294b81d7', 'major': 55, 'minor': 55},
+    {'uuid': '7ba4fa5e-5f3d-4ff8-b4f0-fd3667da162b', 'major': 55, 'minor': 55},
+    {'uuid': 'ab28f612-79e5-43a4-9bb4-a0f0c4c170de', 'major': 55, 'minor': 55},
+    {'uuid': '8ad0b1a2-6b7f-468a-8d16-12a2e4b0eed7', 'major': 55, 'minor': 55},
+    {'uuid': '6f7e45ce-ee71-4a1e-81e7-ac6eb6318478', 'major': 55, 'minor': 55},
+    {'uuid': '04b41a3b-a926-45a5-b54a-f98cb8eaaec2', 'major': 55, 'minor': 55},
+    {'uuid': 'b1e467b2-ce29-4c93-a6bc-b50a8a5a0140', 'major': 55, 'minor': 55},
+    {'uuid': 'c4925d93-4258-43eb-8946-876c1a54f2c6', 'major': 55, 'minor': 55},
+    {'uuid': 'f9f142d8-83d4-4a80-a8f2-31a012473c20', 'major': 55, 'minor': 55},
+    {'uuid': '769b054c-dafa-4aa3-acd7-1aee1a931600', 'major': 55, 'minor': 55},
+    {'uuid': '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d', 'major': 55, 'minor': 55},
+    {'uuid': '443b0b45-d34a-4f72-a960-d87ce31b4f29', 'major': 55, 'minor': 55},
+    {'uuid': 'a9dcec49-cc40-4682-a3e9-efb6a9d3a498', 'major': 55, 'minor': 55},
+    {'uuid': '3562a67c-83a9-4216-b44b-07d87d9e2915', 'major': 55, 'minor': 55},
+    {'uuid': '07fce829-f984-4fbf-b6cc-3b7566719bda', 'major': 55, 'minor': 55},
+    {'uuid': 'c67dd57f-2db0-427a-9a6f-374c32906bfa', 'major': 55, 'minor': 55},
+    {'uuid': '17ae34f6-077b-42da-bb27-158e298cea70', 'major': 55, 'minor': 55},
+    {'uuid': 'bd77811d-10b9-4137-9627-a4f8bf0325d9', 'major': 55, 'minor': 55},
+    {'uuid': '649a63b0-ea76-4a01-a96b-466c32410aa8', 'major': 55, 'minor': 55},
+    {'uuid': '0a1b0d57-79d2-4c73-ac31-dde7a94543c7', 'major': 55, 'minor': 55},
+    {'uuid': 'a4514da0-8a02-436c-a737-0806ffde91b3', 'major': 55, 'minor': 55},
+    {'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789', 'major': 55, 'minor': 55},
+    {'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5', 'major': 55, 'minor': 55},
+    {'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf', 'major': 55, 'minor': 55},
+  ];
 
   final ScrollController _scrollController = ScrollController();
 
@@ -73,179 +100,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     try {
-      BeaconsPlugin.listenToBeacons(beaconEventsController);
-
-      beaconEventsController.stream.listen((data) {
-        print('data');
-        //print(data);
-        //print(data.isEmpty);
-        if (data.isNotEmpty && isRunning) {
-          print("******Reading**************");
-          dynamic decodedData = jsonDecode(data);
-          if (decodedData is Map) {
-            final Map beaconResult = decodedData;
-
-            int existingIndex = _results.indexWhere(
-                (element) => element['uuid'] == beaconResult['uuid']);
-
-            if (existingIndex >= 0) {
-              _results[existingIndex] = beaconResult;
-            } else {
-              print('test');
-              List<Map<String, dynamic>> dataReceived = [
-                {
-                  'uuid': '58b8008b-b05b-4783-bd32-2da7294b81d7',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '7ba4fa5e-5f3d-4ff8-b4f0-fd3667da162b',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'ab28f612-79e5-43a4-9bb4-a0f0c4c170de',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '8ad0b1a2-6b7f-468a-8d16-12a2e4b0eed7',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '6f7e45ce-ee71-4a1e-81e7-ac6eb6318478',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '04b41a3b-a926-45a5-b54a-f98cb8eaaec2',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'b1e467b2-ce29-4c93-a6bc-b50a8a5a0140',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'c4925d93-4258-43eb-8946-876c1a54f2c6',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'f9f142d8-83d4-4a80-a8f2-31a012473c20',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '769b054c-dafa-4aa3-acd7-1aee1a931600',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '443b0b45-d34a-4f72-a960-d87ce31b4f29',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'a9dcec49-cc40-4682-a3e9-efb6a9d3a498',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '3562a67c-83a9-4216-b44b-07d87d9e2915',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '07fce829-f984-4fbf-b6cc-3b7566719bda',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'c67dd57f-2db0-427a-9a6f-374c32906bfa',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '17ae34f6-077b-42da-bb27-158e298cea70',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'bd77811d-10b9-4137-9627-a4f8bf0325d9',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '649a63b0-ea76-4a01-a96b-466c32410aa8',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '0a1b0d57-79d2-4c73-ac31-dde7a94543c7',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'a4514da0-8a02-436c-a737-0806ffde91b3',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5',
-                  'major': 55,
-                  'minor': 55
-                },
-                {
-                  'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf',
-                  'major': 55,
-                  'minor': 55
-                },
-              ];
-
-              //!Si el uuid q intenta entrar esta en la lista, que entre al array de _results
-
-              for (int i = 0; i < dataReceived.length; i++) {
-                if (dataReceived[i]['uuid'] == beaconResult['uuid']) {
-                  _results.add(beaconResult);
-                  break;
-                }
-              }
-            }
-
-            setState(() {
-              _nrMessagesReceived++;
-              _results;
-            });
-
-            if (!_isInForeground) {
-              _showNotification("Beacons DataReceived: " + data);
-            }
-
-            print("Beacons DataReceived: " + data);
-          }
-        }
-      }, onDone: () {
-        print('done');
-      }, onError: (error) {
-        print("Error: $error");
-      });
-
-      //Send 'true' to run in background
-      await BeaconsPlugin.runInBackground(true);
-
       if (Platform.isAndroid) {
         //Prominent disclosure
         await BeaconsPlugin.setDisclosureDialogMessage(
@@ -258,21 +112,58 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
 
       if (Platform.isAndroid) {
-        await BeaconsPlugin.addRegion(
-            "BeaconType1", "909c3cf9-fc5c-4841-b695-380958a51a5a");
-        await BeaconsPlugin.addRegion(
-            "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
-
-        BeaconsPlugin.addBeaconLayoutForAndroid(
+        BeaconsPlugin.listenToBeacons(beaconEventsController);
+        await BeaconsPlugin.addBeaconLayoutForAndroid(
             "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
-        BeaconsPlugin.addBeaconLayoutForAndroid(
+        await BeaconsPlugin.addBeaconLayoutForAndroid(
             "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24");
 
-        BeaconsPlugin.setForegroundScanPeriodForAndroid(
-            foregroundScanPeriod: 2200, foregroundBetweenScanPeriod: 10);
+        beaconEventsController.stream.listen((data) {
+          print('data');
+          print(data);
+          print(data.isEmpty);
+          if (data.isNotEmpty && isRunning) {
+            print("******Reading**************");
+            dynamic decodedData = jsonDecode(data);
+            if (decodedData is Map) {
+              final Map beaconResult = decodedData;
 
-        BeaconsPlugin.setBackgroundScanPeriodForAndroid(
-            backgroundScanPeriod: 2200, backgroundBetweenScanPeriod: 10);
+              int existingIndex = _results.indexWhere(
+                  (element) => element['uuid'] == beaconResult['uuid']);
+
+              if (existingIndex >= 0) {
+                _results[existingIndex] = beaconResult;
+              } else {
+                print('test');
+
+                //!Si el uuid q intenta entrar esta en la lista, que entre al array de _results
+                _results.add(beaconResult);
+
+                for (int i = 0; i < dataReceived.length; i++) {
+                  if (dataReceived[i]['uuid'] == beaconResult['uuid']) {
+                    _results.add(beaconResult);
+                    break;
+                  }
+                }
+              }
+
+              setState(() {
+                _nrMessagesReceived++;
+                _results;
+              });
+
+              if (!_isInForeground) {
+                _showNotification("Beacons DataReceived: " + data);
+              }
+
+              print("Beacons DataReceived: " + data);
+            }
+          }
+        }, onDone: () {
+          print('done');
+        }, onError: (error) {
+          print("Error: $error");
+        });
 
         BeaconsPlugin.channel.setMethodCallHandler((call) async {
           print("Method: ${call.method}");
@@ -287,130 +178,61 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 "Prominent disclosure message is shown to the user!");
           }
         });
+
+        // await BeaconsPlugin.addRegion(
+        //     "BeaconType1", "ab28f612-79e5-43a4-9bb4-a0f0c4c170de");
+        // await BeaconsPlugin.addRegion(
+        //     "BeaconType2", "6a84c716-0f2a-1ce9-f210-6a63bd873dd9");
+
+        //Send 'true' to run in background
+        await BeaconsPlugin.runInBackground(true);
       } else if (Platform.isIOS) {
+        BeaconsPlugin.listenToBeacons(beaconEventsController);
+
+        beaconEventsController.stream.listen((data) {
+          print('data');
+          print(data);
+          print(data.isEmpty);
+          if (data.isNotEmpty && isRunning) {
+            print("******Reading**************");
+            dynamic decodedData = jsonDecode(data);
+            if (decodedData is Map) {
+              final Map beaconResult = decodedData;
+              // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+              // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
+
+              int existingIndex = _results.indexWhere(
+                  (element) => element['uuid'] == beaconResult['uuid']);
+
+              if (existingIndex >= 0) {
+                _results[existingIndex] = beaconResult;
+              } else {
+                _results.add(beaconResult);
+              }
+
+              setState(() {
+                // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
+                _nrMessagesReceived++;
+                _results;
+              });
+
+              if (!_isInForeground) {
+                _showNotification("Beacons DataReceived: " + data);
+              }
+
+              print("Beacons DataReceived: " + data);
+            }
+          }
+        }, onDone: () {
+          print('done');
+        }, onError: (error) {
+          print("Error: $error");
+        });
+
+        //Send 'true' to run in background
+        await BeaconsPlugin.runInBackground(true);
+
         _showNotification("Beacons monitoring started..");
-        List<Map<String, dynamic>> dataReceived = [
-          {
-            'uuid': '58b8008b-b05b-4783-bd32-2da7294b81d7',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '7ba4fa5e-5f3d-4ff8-b4f0-fd3667da162b',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'ab28f612-79e5-43a4-9bb4-a0f0c4c170de',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '8ad0b1a2-6b7f-468a-8d16-12a2e4b0eed7',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '6f7e45ce-ee71-4a1e-81e7-ac6eb6318478',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '04b41a3b-a926-45a5-b54a-f98cb8eaaec2',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'b1e467b2-ce29-4c93-a6bc-b50a8a5a0140',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'c4925d93-4258-43eb-8946-876c1a54f2c6',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'f9f142d8-83d4-4a80-a8f2-31a012473c20',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '769b054c-dafa-4aa3-acd7-1aee1a931600',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '443b0b45-d34a-4f72-a960-d87ce31b4f29',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'a9dcec49-cc40-4682-a3e9-efb6a9d3a498',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '3562a67c-83a9-4216-b44b-07d87d9e2915',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '07fce829-f984-4fbf-b6cc-3b7566719bda',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'c67dd57f-2db0-427a-9a6f-374c32906bfa',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '17ae34f6-077b-42da-bb27-158e298cea70',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'bd77811d-10b9-4137-9627-a4f8bf0325d9',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '649a63b0-ea76-4a01-a96b-466c32410aa8',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '0a1b0d57-79d2-4c73-ac31-dde7a94543c7',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'a4514da0-8a02-436c-a737-0806ffde91b3',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5',
-            'major': 55,
-            'minor': 55
-          },
-          {
-            'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf',
-            'major': 55,
-            'minor': 55
-          },
-        ];
         int counter = 0;
         for (var beacon in dataReceived) {
           BeaconsPlugin.addRegionForIOS(
@@ -431,11 +253,12 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         //    );
         // BeaconsPlugin.addRegionForIOS(
         //     '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d', 55, 55, 'BeaconType2');
-        await BeaconsPlugin.startMonitoring();
         // setState(() {
         //   isRunning = true;
         // });
       }
+
+      await BeaconsPlugin.startMonitoring();
     } catch (e) {
       print('ERRORRR');
       print(e);
@@ -446,6 +269,43 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration.zero, () async {
+      if (Platform.isAndroid) {
+        PermissionStatus notificationStatus =
+            await Permission.notification.status;
+
+        if (notificationStatus.isDenied) {
+          await Permission.notification.request();
+        }
+
+        PermissionStatus neaybyStatus =
+            await Permission.nearbyWifiDevices.status;
+
+        if (neaybyStatus.isDenied) {
+          await Permission.nearbyWifiDevices.request();
+        }
+
+        PermissionStatus status = await Permission.bluetoothScan.status;
+
+        if (status.isDenied) {
+          await Permission.bluetoothScan.request();
+        }
+
+        PermissionStatus connectStatus =
+            await Permission.bluetoothConnect.status;
+
+        if (connectStatus.isDenied) {
+          await Permission.bluetoothConnect.request();
+        }
+
+        PermissionStatus locationStatus =
+            await Permission.locationWhenInUse.status;
+
+        if (locationStatus.isDenied) {
+          await Permission.locationWhenInUse.request();
+        }
+      }
+    });
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -495,7 +355,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     } else {
                       print("Start");
                       initPlatformState();
-                      //await BeaconsPlugin.startMonitoring();
                     }
                     setState(() {
                       isRunning = !isRunning;
