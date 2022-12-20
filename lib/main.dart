@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-//version 12/09/2022
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -56,6 +54,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     {'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789', 'major': 55, 'minor': 55},
     {'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5', 'major': 55, 'minor': 55},
     {'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf', 'major': 55, 'minor': 55},
+    //!Real list
+    {'uuid': '57fdee5a-7fe8-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 1},
+    {'uuid': '3b270acc-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 2},
+    {'uuid': '86fda33e-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 3},
+    {'uuid': 'b3a62334-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 4},
+    {'uuid': 'f203bb6e-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 5},
+    {'uuid': '52d4d10c-7feb-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 6},
+    {'uuid': '8e7ba6f0-7fea-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 7},
+    {'uuid': 'c0828678-7fea-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 8},
+    {'uuid': '02edaede-7feb-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 9},
   ];
 
   final ScrollController _scrollController = ScrollController();
@@ -67,15 +75,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // initPlatformState();
-
-    //WidgetsFlutterBinding.ensureInitialized(); //!added by me
 
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('app_icon');
-
-    //!AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
 
     var initializationSettingsIOS =
         const DarwinInitializationSettings(onDidReceiveLocalNotification: null);
@@ -122,6 +125,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           print('data');
           print(data);
           print(data.isEmpty);
+
           if (data.isNotEmpty && isRunning) {
             print("******Reading**************");
             dynamic decodedData = jsonDecode(data);
@@ -135,9 +139,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 _results[existingIndex] = beaconResult;
               } else {
                 print('test');
-
-                //!Si el uuid q intenta entrar esta en la lista, que entre al array de _results
-                _results.add(beaconResult);
 
                 for (int i = 0; i < dataReceived.length; i++) {
                   if (dataReceived[i]['uuid'] == beaconResult['uuid']) {
@@ -171,7 +172,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
             _showNotification("Beacons monitoring started..");
             await BeaconsPlugin.startMonitoring();
             setState(() {
-              isRunning = true;
+              isRunning = false; //!Changed
             });
           } else if (call.method == 'isPermissionDialogShown') {
             _showNotification(
@@ -211,7 +212,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               }
 
               setState(() {
-                // Asi en vez de almacenarlo en string ya lo guardas en json o en un arreglo
                 _nrMessagesReceived++;
                 _results;
               });
@@ -229,9 +229,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           print("Error: $error");
         });
 
-        //Send 'true' to run in background
-        await BeaconsPlugin.runInBackground(true);
-
         _showNotification("Beacons monitoring started..");
         int counter = 0;
         for (var beacon in dataReceived) {
@@ -243,19 +240,9 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
           counter++;
         }
-        print('counter:');
-        print(counter);
-        //    BeaconsPlugin.addRegionForIOS(
-        //      '58A97DEC-7CD7-44CB-9DA8-F02DC3466165',
-        //      55,
-        //      66,
-        //      'BeaconType1',
-        //    );
-        // BeaconsPlugin.addRegionForIOS(
-        //     '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d', 55, 55, 'BeaconType2');
-        // setState(() {
-        //   isRunning = true;
-        // });
+
+        //Send 'true' to run in background
+        await BeaconsPlugin.runInBackground(true);
       }
 
       await BeaconsPlugin.startMonitoring();
@@ -428,110 +415,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           String formattedDate =
               DateFormat('yyyy-MM-dd – kk:mm:ss.SSS').format(now);
 
-          final item2 = Card(
-            elevation: 10,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'UUID',
-                          value: _results[index]['uuid'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Major:',
-                          value: _results[index]['major'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Minor:',
-                          value: _results[index]['minor'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Distance:',
-                          value: _results[index]['distance'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'Proximity:',
-                          value: _results[index]['proximity'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'RSSI:',
-                          value: _results[index]['rssi'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'macAddress:',
-                          value: _results[index]['macAddress'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: ThemeLabelValue(
-                          label: 'txPower:',
-                          value: _results[index]['txPower'],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-
           final item3 = Card(
-            //!Adding this style.
             color: Colors.grey[100],
             elevation: 50,
             child: Container(
@@ -592,10 +476,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Major',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             Text(_results[index]['major'],
-                                style: const TextStyle(fontSize: 10)),
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -609,10 +493,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Minor',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             Text(_results[index]['minor'],
-                                style: const TextStyle(fontSize: 10)),
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -626,10 +510,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Mac Address',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
-                            Text(_results[index]['macAddress'],
-                                style: const TextStyle(fontSize: 10)),
+                            Text(_results[index]['macAddress'] ?? 'N/A',
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -649,10 +533,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'RSSI',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             Text(_results[index]['rssi'],
-                                style: const TextStyle(fontSize: 10)),
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -666,10 +550,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Distance',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             Text(_results[index]['distance'],
-                                style: const TextStyle(fontSize: 10)),
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -683,10 +567,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Proximity',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             Text(_results[index]['proximity'],
-                                style: const TextStyle(fontSize: 10)),
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -700,10 +584,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             const Text(
                               'Tx',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                                  fontWeight: FontWeight.bold, fontSize: 14),
                             ),
-                            Text(_results[index]['txPower'],
-                                style: const TextStyle(fontSize: 10)),
+                            Text(_results[index]['txPower'] ?? 'N/A',
+                                style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
