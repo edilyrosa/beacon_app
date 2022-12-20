@@ -1,15 +1,27 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io' show Directory, File, Platform;
 import 'dart:math';
+import 'package:excel/excel.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:intl/intl.dart';
 import 'package:beacons_plugin/beacons_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Plugin must be initialized before using
+  await FlutterDownloader.initialize(
+      debug:
+          true, // optional: set to false to disable printing logs to console (default: true)
+      ignoreSsl:
+          true // option: set to false to disable working with http links (default: false)
+      );
+
   runApp(const MyApp());
 }
 
@@ -28,43 +40,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var isRunning = false;
   final List<dynamic> _results = [];
   bool _isInForeground = true;
-  List<Map<String, dynamic>> dataReceived = [
-    {'uuid': '0129DE6B-F5B6-4A02-94C5-EB64C1455116', 'major': 1, 'minor': 1},
-    {'uuid': '58b8008b-b05b-4783-bd32-2da7294b81d7', 'major': 55, 'minor': 55},
-    {'uuid': '7ba4fa5e-5f3d-4ff8-b4f0-fd3667da162b', 'major': 55, 'minor': 55},
-    {'uuid': 'ab28f612-79e5-43a4-9bb4-a0f0c4c170de', 'major': 55, 'minor': 55},
-    {'uuid': '8ad0b1a2-6b7f-468a-8d16-12a2e4b0eed7', 'major': 55, 'minor': 55},
-    {'uuid': '6f7e45ce-ee71-4a1e-81e7-ac6eb6318478', 'major': 55, 'minor': 55},
-    {'uuid': '04b41a3b-a926-45a5-b54a-f98cb8eaaec2', 'major': 55, 'minor': 55},
-    {'uuid': 'b1e467b2-ce29-4c93-a6bc-b50a8a5a0140', 'major': 55, 'minor': 55},
-    {'uuid': 'c4925d93-4258-43eb-8946-876c1a54f2c6', 'major': 55, 'minor': 55},
-    {'uuid': 'f9f142d8-83d4-4a80-a8f2-31a012473c20', 'major': 55, 'minor': 55},
-    {'uuid': '769b054c-dafa-4aa3-acd7-1aee1a931600', 'major': 55, 'minor': 55},
-    {'uuid': '6eca0817-b5dd-4556-8a4c-748dfbd1ed1d', 'major': 55, 'minor': 55},
-    {'uuid': '443b0b45-d34a-4f72-a960-d87ce31b4f29', 'major': 55, 'minor': 55},
-    {'uuid': 'a9dcec49-cc40-4682-a3e9-efb6a9d3a498', 'major': 55, 'minor': 55},
-    {'uuid': '3562a67c-83a9-4216-b44b-07d87d9e2915', 'major': 55, 'minor': 55},
-    {'uuid': '07fce829-f984-4fbf-b6cc-3b7566719bda', 'major': 55, 'minor': 55},
-    {'uuid': 'c67dd57f-2db0-427a-9a6f-374c32906bfa', 'major': 55, 'minor': 55},
-    {'uuid': '17ae34f6-077b-42da-bb27-158e298cea70', 'major': 55, 'minor': 55},
-    {'uuid': 'bd77811d-10b9-4137-9627-a4f8bf0325d9', 'major': 55, 'minor': 55},
-    {'uuid': '649a63b0-ea76-4a01-a96b-466c32410aa8', 'major': 55, 'minor': 55},
-    {'uuid': '0a1b0d57-79d2-4c73-ac31-dde7a94543c7', 'major': 55, 'minor': 55},
-    {'uuid': 'a4514da0-8a02-436c-a737-0806ffde91b3', 'major': 55, 'minor': 55},
-    {'uuid': 'dcdc4b39-35aa-4a0c-9ff6-94b71b7d9789', 'major': 55, 'minor': 55},
-    {'uuid': '52aac7d6-85cd-40dd-8be5-42aa88bb80d5', 'major': 55, 'minor': 55},
-    {'uuid': '025fe329-ceb9-4fc8-b37a-178b6d207bbf', 'major': 55, 'minor': 55},
-    //!Real list
-    {'uuid': '57fdee5a-7fe8-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 1},
-    {'uuid': '3b270acc-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 2},
-    {'uuid': '86fda33e-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 3},
-    {'uuid': 'b3a62334-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 4},
-    {'uuid': 'f203bb6e-7fe9-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 5},
-    {'uuid': '52d4d10c-7feb-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 6},
-    {'uuid': '8e7ba6f0-7fea-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 7},
-    {'uuid': 'c0828678-7fea-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 8},
-    {'uuid': '02edaede-7feb-11ed-a1eb-0242ac120002', 'major': 100, 'minor': 9},
-  ];
+  bool isLoadedScreen = false;
+  List<Map<String, dynamic>> dataReceived = [];
 
   final ScrollController _scrollController = ScrollController();
 
@@ -230,6 +207,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         });
 
         _showNotification("Beacons monitoring started..");
+        print('holaa');
+        print(dataReceived);
         int counter = 0;
         for (var beacon in dataReceived) {
           BeaconsPlugin.addRegionForIOS(
@@ -254,45 +233,125 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (!mounted) return;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () async {
-      if (Platform.isAndroid) {
-        PermissionStatus notificationStatus =
-            await Permission.notification.status;
+  Future<void> downloadList() async {
+    String path = '';
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    path = appDocDir.path;
 
-        if (notificationStatus.isDenied) {
-          await Permission.notification.request();
-        }
+    String url = 'https://cirkle-testing.s3.amazonaws.com/beacons.xlsx';
 
-        PermissionStatus neaybyStatus =
-            await Permission.nearbyWifiDevices.status;
+    FlutterDownloader.registerCallback(downloadCallback);
 
-        if (neaybyStatus.isDenied) {
-          await Permission.nearbyWifiDevices.request();
-        }
+    await FlutterDownloader.enqueue(
+      url: url,
+      headers: {}, // optional: header send with url (auth token etc)
+      savedDir: path,
+      showNotification:
+          true, // show download progress in status bar (for Android)
+      openFileFromNotification:
+          true, // click on notification to open downloaded file (for Android)
+    );
+  }
 
-        PermissionStatus status = await Permission.bluetoothScan.status;
+  static void downloadCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    print('ouch');
+  }
 
-        if (status.isDenied) {
-          await Permission.bluetoothScan.request();
-        }
+  Future<void> preloadList() async {
+    if (dataReceived.isEmpty) {
+      String path = '';
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      path = appDocDir.path;
 
-        PermissionStatus connectStatus =
-            await Permission.bluetoothConnect.status;
+      var file = '$path/beacons.xlsx';
+      var bytes = File(file).readAsBytesSync();
+      var excel = Excel.decodeBytes(bytes);
 
-        if (connectStatus.isDenied) {
-          await Permission.bluetoothConnect.request();
-        }
+      for (var table in excel.tables.keys) {
+        for (var row in excel.tables[table]!.rows) {
+          Map<String, dynamic> rowValues = {};
+          for (var cell in row) {
+            // Prevent saving header
+            if (cell!.rowIndex == 0) {
+              continue;
+            }
 
-        PermissionStatus locationStatus =
-            await Permission.locationWhenInUse.status;
+            switch (cell!.colIndex) {
+              case 0:
+                rowValues['uuid'] = cell!.value.toString();
+                break;
+              case 1:
+                rowValues['major'] = int.parse(cell!.value.toString());
+                break;
+              case 2:
+                rowValues['minor'] = int.parse(cell!.value.toString());
+                break;
+            }
+          }
 
-        if (locationStatus.isDenied) {
-          await Permission.locationWhenInUse.request();
+          if (rowValues.isNotEmpty) {
+            dataReceived.add(rowValues);
+          }
         }
       }
-    });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoadedScreen) {
+      isLoadedScreen = true;
+      Future.delayed(Duration.zero, () async {
+        if (Platform.isAndroid) {
+          PermissionStatus notificationStatus =
+              await Permission.notification.status;
+
+          if (notificationStatus.isDenied) {
+            await Permission.notification.request();
+          }
+
+          PermissionStatus neaybyStatus =
+              await Permission.nearbyWifiDevices.status;
+
+          if (neaybyStatus.isDenied) {
+            await Permission.nearbyWifiDevices.request();
+          }
+
+          PermissionStatus status = await Permission.bluetoothScan.status;
+
+          if (status.isDenied) {
+            await Permission.bluetoothScan.request();
+          }
+
+          PermissionStatus connectStatus =
+              await Permission.bluetoothConnect.status;
+
+          if (connectStatus.isDenied) {
+            await Permission.bluetoothConnect.request();
+          }
+
+          PermissionStatus locationStatus =
+              await Permission.locationWhenInUse.status;
+
+          if (locationStatus.isDenied) {
+            await Permission.locationWhenInUse.request();
+          }
+
+          PermissionStatus externalStorage =
+              await Permission.manageExternalStorage.status;
+
+          if (externalStorage.isDenied) {
+            await Permission.manageExternalStorage.request();
+          }
+        }
+      });
+
+      Future.delayed(const Duration(seconds: 1), () async {
+        await downloadList();
+      });
+    }
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -340,6 +399,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       print("Stop");
                       await BeaconsPlugin.stopMonitoring();
                     } else {
+                      await preloadList();
                       print("Start");
                       initPlatformState();
                     }
