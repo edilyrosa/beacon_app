@@ -41,6 +41,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final List<dynamic> _results = [];
   bool _isInForeground = true;
   bool isLoadedScreen = false;
+  bool isFirstLoaded = true;
   List<Map<String, dynamic>> dataReceived = [];
   List<String> log = [];
 
@@ -52,6 +53,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    initPlatformState();
     WidgetsBinding.instance.addObserver(this);
 
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
@@ -166,51 +168,49 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         //Send 'true' to run in background
         await BeaconsPlugin.runInBackground(true);
       } else if (Platform.isIOS) {
-        log = [];
-        log.add('Iniciando la carga del scanner');
-        BeaconsPlugin.listenToBeacons(beaconEventsController);
+        if (isFirstLoaded) {
+          BeaconsPlugin.listenToBeacons(beaconEventsController);
+          beaconEventsController.stream.listen((data) {
+            print('data');
+            print(data);
+            print(data.isEmpty);
+            if (data.isNotEmpty && isRunning) {
+              print("******Reading**************");
+              dynamic decodedData = jsonDecode(data);
+              if (decodedData is Map) {
+                final Map beaconResult = decodedData;
+                // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
+                // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
 
-        beaconEventsController.stream.listen((data) {
-          print('data');
-          print(data);
-          print(data.isEmpty);
-          if (data.isNotEmpty && isRunning) {
-            print("******Reading**************");
-            dynamic decodedData = jsonDecode(data);
-            if (decodedData is Map) {
-              final Map beaconResult = decodedData;
-              // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
-              // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
-              log.add(beaconResult.toString());
+                int existingIndex = _results.indexWhere(
+                    (element) => element['uuid'] == beaconResult['uuid']);
 
-              int existingIndex = _results.indexWhere(
-                  (element) => element['uuid'] == beaconResult['uuid']);
+                if (existingIndex >= 0) {
+                  _results[existingIndex] = beaconResult;
+                } else {
+                  _results.add(beaconResult);
+                }
 
-              if (existingIndex >= 0) {
-                _results[existingIndex] = beaconResult;
-              } else {
-                _results.add(beaconResult);
+                setState(() {
+                  _nrMessagesReceived++;
+                  _results;
+                });
+
+                if (!_isInForeground) {
+                  _showNotification("Beacons DataReceived: " + data);
+                }
+
+                print("Beacons DataReceived: " + data);
               }
-
-              setState(() {
-                _nrMessagesReceived++;
-                _results;
-              });
-
-              if (!_isInForeground) {
-                _showNotification("Beacons DataReceived: " + data);
-              }
-
-              print("Beacons DataReceived: " + data);
             }
-          }
-        }, onDone: () {
-          print('done');
-        }, onError: (error) {
-          print("Error: $error");
-        });
+          }, onDone: () {
+            print('done');
+          }, onError: (error) {
+            print("Error: $error");
+          });
+        }
 
-        log.add('Iniciando la configuracion de regiones');
+        BeaconsPlugin.clearRegions();
         _showNotification("Beacons monitoring started..");
         int counter = 0;
         for (var beacon in dataReceived) {
@@ -223,16 +223,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           counter++;
         }
 
-        log.add('Regiones cargadas');
-
-        //Send 'true' to run in background
-        await BeaconsPlugin.runInBackground(true);
-
-        log.add('Background set');
+        if (isFirstLoaded) {
+          isFirstLoaded = false;
+          await BeaconsPlugin.runInBackground(true);
+        }
       }
-
-      await BeaconsPlugin.startMonitoring();
-      log.add('Started monitor');
     } catch (e) {
       print('ERRORRR');
       print(e);
@@ -402,16 +397,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           fontWeight: FontWeight.bold,
                         )),
               )),
-              Center(
-                  child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(log.toString(),
-                    style: Theme.of(context).textTheme.headline4?.copyWith(
-                          fontSize: 18,
-                          color: const Color.fromARGB(255, 14, 193, 233),
-                          fontWeight: FontWeight.bold,
-                        )),
-              )),
               Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: ElevatedButton(
@@ -420,9 +405,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       print("Stop");
                       await BeaconsPlugin.stopMonitoring();
                     } else {
-                      await preloadList();
                       print("Start");
-                      initPlatformState();
+                      await preloadList();
+                      await initPlatformState();
+                      await BeaconsPlugin.startMonitoring();
                     }
                     setState(() {
                       log;
