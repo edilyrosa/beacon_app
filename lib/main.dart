@@ -42,6 +42,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _isInForeground = true;
   bool isLoadedScreen = false;
   List<Map<String, dynamic>> dataReceived = [];
+  List<String> log = [];
 
   final ScrollController _scrollController = ScrollController();
 
@@ -165,6 +166,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         //Send 'true' to run in background
         await BeaconsPlugin.runInBackground(true);
       } else if (Platform.isIOS) {
+        log = [];
+        log.add('Iniciando la carga del scanner');
         BeaconsPlugin.listenToBeacons(beaconEventsController);
 
         beaconEventsController.stream.listen((data) {
@@ -178,6 +181,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               final Map beaconResult = decodedData;
               // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
               // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
+              log.add(beaconResult.toString());
 
               int existingIndex = _results.indexWhere(
                   (element) => element['uuid'] == beaconResult['uuid']);
@@ -206,12 +210,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           print("Error: $error");
         });
 
+        log.add('Iniciando la configuracion de regiones');
         _showNotification("Beacons monitoring started..");
-        print('holaa');
-        print(dataReceived);
         int counter = 0;
         for (var beacon in dataReceived) {
-          BeaconsPlugin.addRegionForIOS(
+          await BeaconsPlugin.addRegionForIOS(
             beacon['uuid'], // String
             beacon['major'], // int,
             beacon['minor'], // int
@@ -220,14 +223,20 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           counter++;
         }
 
+        log.add('Regiones cargadas');
+
         //Send 'true' to run in background
         await BeaconsPlugin.runInBackground(true);
+
+        log.add('Background set');
       }
 
       await BeaconsPlugin.startMonitoring();
+      log.add('Started monitor');
     } catch (e) {
       print('ERRORRR');
       print(e);
+      log.add('ERRORRR: $e');
     }
 
     if (!mounted) return;
@@ -254,9 +263,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   static void downloadCallback(
-      String id, DownloadTaskStatus status, int progress) {
-    print('ouch');
-  }
+      String id, DownloadTaskStatus status, int progress) {}
 
   Future<void> preloadList() async {
     if (dataReceived.isEmpty) {
@@ -295,6 +302,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           }
         }
       }
+
+      setState(() {
+        dataReceived;
+      });
     }
   }
 
@@ -391,6 +402,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           fontWeight: FontWeight.bold,
                         )),
               )),
+              Center(
+                  child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(log.toString(),
+                    style: Theme.of(context).textTheme.headline4?.copyWith(
+                          fontSize: 18,
+                          color: const Color.fromARGB(255, 14, 193, 233),
+                          fontWeight: FontWeight.bold,
+                        )),
+              )),
               Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: ElevatedButton(
@@ -404,6 +425,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       initPlatformState();
                     }
                     setState(() {
+                      log;
                       isRunning = !isRunning;
                     });
                   },
