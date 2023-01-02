@@ -179,8 +179,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               dynamic decodedData = jsonDecode(data);
               if (decodedData is Map) {
                 final Map beaconResult = decodedData;
-                // !NO OLVIDAR ARRGLAR LA PERMISOLOGIA PARA QUE A CADA RATO NO PIDA MERMISO MANUALS y la pimpiada de CACHE
-                // checkIfBeaconExist(_results, jsonDecode(data)); //! esto qda comentado??????
 
                 int existingIndex = _results.indexWhere(
                     (element) => element['uuid'] == beaconResult['uuid']);
@@ -359,9 +357,19 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     return MaterialApp(
+      theme: ThemeData(
+        fontFamily: "Quicksand",
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+              fontFamily: "Quicksand",
+              color: Colors.white,
+              fontSize: 30,
+              fontWeight: FontWeight.bold),
+        ),
+      ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             'Loop Manager',
             style: TextStyle(fontSize: 28),
             textAlign: TextAlign.center,
@@ -375,7 +383,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               Container(
                   width: double.infinity,
                   height: 35,
-                  color: const Color.fromARGB(255, 14, 193, 233),
+                  color: const Color.fromRGBO(100, 240, 250, 1),
                   child: const Card(
                       elevation: 25,
                       child: Text(
@@ -387,18 +395,84 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         ),
                         textAlign: TextAlign.center,
                       ))),
-              Center(
-                  child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Total Results: ' + _results.length.toString(),
-                    style: Theme.of(context).textTheme.headline4?.copyWith(
-                          fontSize: 18,
-                          color: const Color.fromARGB(255, 14, 193, 233),
-                          fontWeight: FontWeight.bold,
-                        )),
-              )),
+              // Center(
+              //     child: Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Text('Total Results: ' + _results.length.toString(),
+              //       style: Theme.of(context).textTheme.headline4?.copyWith(
+              //             fontSize: 18,
+              //             color: const Color.fromARGB(255, 14, 193, 233),
+              //             fontWeight: FontWeight.bold,
+              //           )),
+              // )),
+
+              Container(
+                padding: EdgeInsets.all(5),
+                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: Card(
+                    color: Colors.grey[100],
+                    elevation: 50,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(5),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(
+                                    'Total Beacons scanned ${_results.length} of ${dataReceived.length}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline4
+                                        ?.copyWith(
+                                          fontSize: 16,
+                                          color: const Color.fromARGB(
+                                              255, 14, 193, 233),
+                                          fontWeight: FontWeight.bold,
+                                        )),
+                                Text(
+                                    (_results.length == 0
+                                        ? '0%'
+                                        : ('${(((_results.length) / (dataReceived.length)) * 100).toStringAsFixed(1)} %')),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline4
+                                        ?.copyWith(
+                                          fontSize: 12,
+                                          color: const Color.fromARGB(
+                                              255, 14, 193, 233),
+                                        )),
+                              ]),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          height: 12,
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 1),
+                                    color: Color.fromRGBO(220, 220, 220, 1),
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: (_results.length as int) / 9,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Color.fromRGBO(100, 240, 250, 1),
+                                      borderRadius: BorderRadius.circular(10)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+              ),
+
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(4.0),
                 child: ElevatedButton(
                   onPressed: () async {
                     if (isRunning) {
@@ -416,13 +490,14 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     });
                   },
                   child: Text(isRunning ? 'Stop Scanning' : 'Start Scanning',
-                      style: const TextStyle(fontSize: 20)),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
               ),
               Visibility(
                 visible: _results.isNotEmpty,
                 child: Padding(
-                  padding: const EdgeInsets.all(2.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: ElevatedButton(
                     onPressed: () async {
                       setState(() {
@@ -431,13 +506,12 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       });
                     },
                     child: const Text("Clear Results",
-                        style: TextStyle(fontSize: 20)),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20.0,
-              ),
+
               Expanded(child: _buildResultsList())
             ],
           ),
@@ -502,14 +576,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         margin: const EdgeInsets.symmetric(
                             vertical: 1, horizontal: 5),
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blue, width: 2)),
+                            border: Border.all(
+                                color: Theme.of(context).primaryColor,
+                                width: 2)),
                         padding: const EdgeInsets.all(10),
                         child: const Text(
                           'iBeacon',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
-                              color: Color.fromARGB(255, 7, 199, 233)),
+                              color: Color.fromRGBO(100, 240, 250, 1)),
                         ),
                       ),
                       Column(
@@ -620,7 +696,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 14),
                             ),
-                            Text(_results[index]['distance'],
+                            Text('${(_results[index]['distance'])} m.',
                                 style: const TextStyle(fontSize: 12)),
                           ],
                         ),
