@@ -25,13 +25,34 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  MyAppState createState() => MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        fontFamily: "Quicksand",
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+              fontFamily: "Quicksand",
+              color: Colors.white,
+              fontSize: 30,
+              fontWeight: FontWeight.bold),
+        ),
+      ),
+      home: const Home(),
+    );
+  }
 }
 
-class MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class Home extends StatefulWidget {
+  const Home({super.key});
+  @override
+  HomeState createState() => HomeState();
+}
+
+class HomeState extends State<Home> with WidgetsBindingObserver {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -304,6 +325,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.of(context).size.width;
+
     if (!isLoadedScreen) {
       isLoadedScreen = true;
       Future.delayed(Duration.zero, () async {
@@ -356,26 +379,17 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       });
     }
 
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: "Quicksand",
-        appBarTheme: const AppBarTheme(
-          titleTextStyle: TextStyle(
-              fontFamily: "Quicksand",
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Loop Manager',
+          style: TextStyle(fontSize: 28),
+          textAlign: TextAlign.center,
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Loop Manager',
-            style: TextStyle(fontSize: 28),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        body: Center(
+      body: SizedBox(
+        width: deviceWidth,
+        child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -407,15 +421,15 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               // )),
 
               Container(
-                padding: EdgeInsets.all(5),
-                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                padding: const EdgeInsets.all(5),
+                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 child: Card(
                     color: Colors.grey[100],
                     elevation: 50,
                     child: Column(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(5),
+                          padding: const EdgeInsets.all(5),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -431,7 +445,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                           fontWeight: FontWeight.bold,
                                         )),
                                 Text(
-                                    (_results.length == 0
+                                    (_results.isEmpty
                                         ? '0%'
                                         : ('${(((_results.length) / (dataReceived.length)) * 100).toStringAsFixed(1)} %')),
                                     style: Theme.of(context)
@@ -445,7 +459,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               ]),
                         ),
                         const SizedBox(height: 4),
-                        Container(
+                        SizedBox(
                           height: 12,
                           child: Stack(
                             children: [
@@ -453,14 +467,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                 decoration: BoxDecoration(
                                     border: Border.all(
                                         color: Colors.grey, width: 1),
-                                    color: Color.fromRGBO(220, 220, 220, 1),
+                                    color:
+                                        const Color.fromRGBO(220, 220, 220, 1),
                                     borderRadius: BorderRadius.circular(10)),
                               ),
                               FractionallySizedBox(
                                 widthFactor: (_results.length as int) / 9,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color: Color.fromRGBO(100, 240, 250, 1),
+                                      color: const Color.fromRGBO(
+                                          100, 240, 250, 1),
                                       borderRadius: BorderRadius.circular(10)),
                                 ),
                               )
@@ -512,7 +528,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ),
               ),
 
-              Expanded(child: _buildResultsList())
+              Expanded(child: _buildResultsList()),
             ],
           ),
         ),
@@ -737,6 +753,18 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Divider(
+                    color: Color.fromARGB(255, 86, 183, 235),
+                    //thickness: 1,
+                  ),
+                  Flexible(
+                    child: Text(
+                      _results[index].toString(),
+                    ),
+                  )
                 ],
               ),
             ),
